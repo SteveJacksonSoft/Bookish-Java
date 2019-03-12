@@ -1,32 +1,31 @@
 package org.softwire.training.bookish;
 
-import org.jdbi.v3.core.Jdbi;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.softwire.training.bookish.dbinteractiontests.JDBCTest;
+import org.softwire.training.bookish.dbinteractiontests.JDBITest;
+import org.softwire.training.bookish.dao.ServerDetails;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 
 public class Main {
+    private static final Logger LOGGER = LogManager.getLogger();
+    public static String bookListingQuery = "SELECT book.title, GROUP_CONCAT(author.authorName SEPARATOR ', ') FROM book " +
+            "INNER JOIN bookauthorRelationship ON book.isbn = bookauthorrelationship.bookId " +
+            "INNER JOIN author ON author.id = bookauthorrelationship.authorId GROUP BY book.title;";
 
     public static void main(String[] args) throws SQLException {
-        String hostname = "localhost";
-        String database = "bookish";
-        String user = "bookish";
-        String password = "bookish";
-        String connectionString = "jdbc:mysql://" + hostname + "/" + database + "?user=" + user + "&password=" + password + "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT&useSSL=false";
-
-        jdbcMethod(connectionString);
-        jdbiMethod(connectionString);
+        jdbcMethod(ServerDetails.connectionString);
+        jdbiMethod(ServerDetails.connectionString);
     }
 
     private static void jdbcMethod(String connectionString) throws SQLException {
         System.out.println("JDBC method...");
 
-        // TODO: print out the details of all the books (using JDBC)
         // See this page for details: https://docs.oracle.com/javase/tutorial/jdbc/basics/processingsqlstatements.html
 
-        Connection connection = DriverManager.getConnection(connectionString);
+        JDBCTest.printBooksOrderedByTitle().forEach(System.out::println);
 
 
 
@@ -37,11 +36,9 @@ public class Main {
 
         // TODO: print out the details of all the books (using JDBI)
         // See this page for details: http://jdbi.org
-        // Use the "Book" class that we've created for you (in the models.database folder)
-
-        Jdbi jdbi = Jdbi.create(connectionString);
+        // Use the "BookCopy" class that we've created for you (in the models.database folder)
 
 
-
+        JDBITest.printBooksOrderedByTitle(connectionString).forEach(System.out::println);
     }
 }
