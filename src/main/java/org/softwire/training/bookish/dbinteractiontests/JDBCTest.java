@@ -3,7 +3,7 @@ package org.softwire.training.bookish.dbinteractiontests;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.softwire.training.bookish.Main;
-import org.softwire.training.bookish.dao.ServerDetails;
+import org.softwire.training.bookish.dao.DBConnector;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,7 +15,7 @@ public class JDBCTest {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static List<String> printBooksOrderedByTitle() {
-        try (Statement statement = ServerDetails.getConnection().createStatement()) {
+        try (Statement statement = DBConnector.getConnector().createStatement()) {
             ResultSet resultSet = statement.executeQuery(Main.bookListingQuery);
             List<String> dbReadOut = new ArrayList<>();
             String format = "%20s : %-20s";
