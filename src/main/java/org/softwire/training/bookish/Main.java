@@ -8,6 +8,8 @@ import org.softwire.training.bookish.dbinteractiontests.JDBITest;
 import org.softwire.training.bookish.models.database.*;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Main {
@@ -23,7 +25,6 @@ public class Main {
         jdbiMethod(DBConnector.connectionString);
 
         library.addBook(new BookCopy(new Author("Jim Hamilton"), "Book Number 1", 33492855012L));
-
     }
 
     private static void jdbcMethod(String connectionString) throws SQLException {

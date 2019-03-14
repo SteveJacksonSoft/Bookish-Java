@@ -10,9 +10,6 @@ public class BookCopy extends Book {
 
     public BookCopy(Author author, String title, long isbn) {
         super(author, title, isbn);
-        this.author = author;
-        this.title = title;
-        this.isbn = isbn;
         this.borrowerId = null;
         this.dateDue = null;
     }

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+
+<nav th:fragment="dataTable(tableHeaders)" >
+    <!-- TODO: validate tableHeaders type -->
+    <table>
+        <tr th:each="header: ${tableHeaders}">
+            <th th:text="${header}"></th>
+        </tr>
+    </table>
+</nav>
+
+
+
+</html>

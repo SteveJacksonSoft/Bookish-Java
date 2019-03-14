@@ -12,14 +12,14 @@ public class DBInteraction {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static void addBookToDB(BookCopy bookCopy) {
-        if (!DBUtil.bookDataIsInTable(bookCopy)) {
-            DBUtil.addBookToTable(bookCopy);
+        if (!DBUtil.bookDataIsInTable(bookCopy.getIsbn())) {
+            DBUtil.addBookToTable(bookCopy.getIsbn(), bookCopy.getTitle());
             if (!DBUtil.authorIsInTable(bookCopy.getAuthor().getName())) {
                 DBUtil.addAuthorToTable(bookCopy.getAuthor().getName());
             }
-            DBUtil.addBookAuthorRelationship(bookCopy, bookCopy.getAuthor().getName());
+            DBUtil.addBookAuthorRelationship(bookCopy.getIsbn(), bookCopy.getAuthor().getName());
         }
-        DBUtil.addBookCopyToTable(bookCopy);
+        DBUtil.addBookCopyToTable(bookCopy.getIsbn());
     }
 
     public static List<BookCopyData> getBooksByTitle(String title) {

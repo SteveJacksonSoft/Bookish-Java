@@ -63,14 +63,14 @@ class DBUtil {
 
     private static int getAuthorId(String authorName) throws SQLDataException {
         return jdbi.withHandle(handle ->
-                handle.createQuery(SQLCommands.getAuthorIdByName)
-                        .bind("name", authorName)
+                handle.createQuery("SELECT id FROM Author WHERE authorName = :authorName")
+                        .bind("authorName", authorName)
                         .mapTo(int.class)
                         .findFirst()
-        )
-                .orElseThrow(() ->
-                        new SQLDataException("The author name '" + authorName + "' is not recognised.")
-                );
+                        .orElseThrow(() ->
+                                new SQLDataException("The author name '" + authorName + "' is not recognised.")
+                        )
+        );
     }
 
 //    static void updateBookProperty(long isbn, String propertyName, String propertyValue) {
@@ -98,64 +98,69 @@ class DBUtil {
 
 
     // Check current data in db
-    static boolean bookDataIsInTable(BookCopy bookCopy) {
+    static boolean bookDataIsInTable(long isbn) {
         return jdbi.withHandle(handle ->
-                handle.createQuery(SQLCommands.bookViewCommand)
-                        .bind("propertyName", "book.isbn")
-                        .bind("propertyValue", bookCopy.getIsbn())
+                handle.createQuery("SELECT * FROM book WHERE isbn = :isbn")
+                        .bind("isbn", isbn)
                         .map((resultSet, context) ->
                                 resultSet.next()
                         )
-                        .findOnly()
+
+                        .findFirst()
+                        .orElse(false)
         );
     }
 
     static boolean authorIsInTable(String authorName) {
         return jdbi.withHandle(handle ->
-                handle.createQuery(SQLCommands.getAuthorIdByName)
+                handle.createQuery("SELECT id FROM Author WHERE authorName = :authorName")
                         .bind("authorName", authorName)
                         .map((resultSet, context) ->
                                 resultSet.next()
                         )
-                        .findOnly()
+                        .findFirst()
+                        .orElse(false)
         );
     }
 
-
     // Adding data to db
-    static void addBookToTable(BookCopy bookCopy) {
+    static void addBookToTable(long isbn, String title) {
         jdbi.withHandle(handle ->
-                handle.createQuery(SQLCommands.addNewBook)
-                        .bind("isbn", bookCopy.getIsbn())
-                        .bind("title", bookCopy.getTitle())
+                handle.createUpdate("INSERT INTO Book(isbn, title) VALUES (:isbn, :title)")
+                        .bind("isbn", isbn)
+                        .bind("title", title)
+                        .execute()
         );
     }
 
     static void addAuthorToTable(String authorName) {
         jdbi.withHandle(handle ->
-                handle.createQuery(SQLCommands.addNewAuthor)
+                handle.createUpdate("INSERT INTO Author(authorName) VALUES (:authorName);")
                         .bind("authorName", authorName)
+                        .execute()
         );
     }
 
-    static void addBookAuthorRelationship(Book book, String authorName) {
+    static void addBookAuthorRelationship(long isbn, String authorName) {
         try {
             int authorId = getAuthorIdAndAddIfNotPresent(authorName);
             jdbi.withHandle(handle ->
-                    handle.createQuery(SQLCommands.addNewBookAuthorRelationship)
-                            .bind("isbn", book.getIsbn())
+                    handle.createUpdate("INSERT INTO bookauthorrelationship(bookId, authorId) VALUES (:isbn, :authorId);")
+                            .bind("isbn", isbn)
                             .bind("authorId", authorId)
+                            .execute()
             );
         } catch (SQLDataException e) {
-            LOGGER.error("The relationship between book isbn " + book.getIsbn() +
+            LOGGER.error("The relationship between book isbn " + isbn +
                     " and author '" + authorName + "' could not be added to the database.");
         }
     }
 
-    static void addBookCopyToTable(BookCopy bookCopy) {
+    static void addBookCopyToTable(long isbn) {
         jdbi.withHandle(handle ->
-                handle.createQuery(SQLCommands.addBookCopy)
-                        .bind("isbn", bookCopy.getIsbn())
+                handle.createUpdate("INSERT INTO BookCopy(isbn, checkedOutTo, dateDue) Values(:isbn, null, null);")
+                        .bind("isbn", isbn)
+                        .execute()
         );
     }
 }
